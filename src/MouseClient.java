@@ -27,7 +27,7 @@ public class MouseClient {
                     robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
                 }
                 else {
-                    robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                    robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                 }
             }
         } catch (Exception e) {
