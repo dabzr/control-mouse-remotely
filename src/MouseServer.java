@@ -1,82 +1,44 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.swing.JFrame;
 
-public class MouseServer extends JFrame {
-    private DataOutputStream out;
-    private boolean leftClick;
-    public MouseServer() throws Exception {
-        setSize(800, 600);
-        setTitle("Mouse Server");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setVisible(true);
+public class MouseServer{
+    public static void connect () {
+        try (ServerSocket serverSocket = new ServerSocket(5000)) {
+            System.out.println("Servidor aguardando conexão...");
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("Cliente conectado");
+            trackMouse(clientSocket);
 
-        ServerSocket serverSocket = new ServerSocket(5000);
-        System.out.println("Servidor aguardando conexão...");
-        Socket clientSocket = serverSocket.accept();
-        System.out.println("Cliente conectado");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-        out = new DataOutputStream(clientSocket.getOutputStream());
-
-        trackMouse();
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                try {
-                    out.close();
-                    clientSocket.close();
-                    serverSocket.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
+    private static void trackMouse(Socket clientSocket) throws IOException, AWTException, InterruptedException {
+        DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
+        Robot robot = new Robot();
+        boolean lastLeftButtonState = false;
         while (true) {
             Point point = MouseInfo.getPointerInfo().getLocation();
-            sendMouseEvent(point);
+            boolean leftButtonPressed = (robot.getPixelColor(point.x, point.y).getRGB() != Color.WHITE.getRGB());
+
+            if (leftButtonPressed != lastLeftButtonState) {
+                out.writeInt(point.x);
+                out.writeInt(point.y);
+                out.writeBoolean(leftButtonPressed);
+                out.flush();
+                lastLeftButtonState = leftButtonPressed;
+            }
             Thread.sleep(10);
         }
     }
 
-    private void trackMouse() {
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    leftClick = true;
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    leftClick = false;
-                }
-            }
-        });
-
-        addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-            }
-        });
-    }
-
-    private void sendMouseEvent(Point point) {
-        try {
-            out.writeInt(point.x);
-            out.writeInt(point.y);
-            out.writeBoolean(leftClick);
-            out.flush();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
     private static void printIP() {
         try {
@@ -90,10 +52,6 @@ public class MouseServer extends JFrame {
 
     public static void main(String[] args) {
         printIP();
-        try {
-            new MouseServer();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        connect();
     }
 }

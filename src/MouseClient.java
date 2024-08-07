@@ -19,13 +19,13 @@ public class MouseClient {
             Robot robot = new Robot();
 
             while (true) {
-
                 int x = in.readInt();
                 int y = in.readInt();
-                boolean leftClick = in.readBoolean();
+                boolean mousePressed = in.readBoolean();
                 robot.mouseMove(x, y);
-                if(leftClick){
+                if (mousePressed) {
                     robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                } else {
                     robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                 }
             }
