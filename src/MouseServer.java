@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -10,8 +11,10 @@ public class MouseServer extends JFrame {
     private DataOutputStream out;
     private boolean leftClick;
     public MouseServer() throws Exception {
+        setSize(800, 600);
         setTitle("Mouse Server");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setVisible(true);
 
         ServerSocket serverSocket = new ServerSocket(5000);
         System.out.println("Servidor aguardando conexão...");
@@ -19,7 +22,13 @@ public class MouseServer extends JFrame {
         System.out.println("Cliente conectado");
 
         out = new DataOutputStream(clientSocket.getOutputStream());
+        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
+        out = new DataOutputStream(clientSocket.getOutputStream());
 
+        int screenWidth = in.readInt();
+        int screenHeight = in.readInt();
+        setSize(screenWidth, screenHeight);
+        setLocationRelativeTo(null);
         trackMouse();
 
         addWindowListener(new WindowAdapter() {
