@@ -1,11 +1,10 @@
-import java.awt.MouseInfo;
-import java.awt.Point;
+import java.awt.*;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class MouseServer {
     private static void printIP(){
@@ -17,14 +16,18 @@ public class MouseServer {
             throw new RuntimeException(e);
         }
     }
-    private static void trackMouse(Socket clientSocket) throws IOException, InterruptedException {
+    private static void trackMouse(Socket clientSocket) throws IOException, InterruptedException, AWTException {
+        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
-
+        Robot robot = new Robot();
         while (true) {
             Point point = MouseInfo.getPointerInfo().getLocation();
             out.writeInt(point.x);
             out.writeInt(point.y);
             out.flush();
+            int x = in.readInt();
+            int y = in.readInt();
+            robot.mouseMove(x, y);
             Thread.sleep(10);
         }
     }
