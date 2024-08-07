@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
@@ -15,13 +16,18 @@ public class MouseClient {
         HandleIp();
         try (Socket socket = new Socket(host, 5000)) { // Substitua pelo IP do servidor
             DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             Robot robot = new Robot();
 
             while (true) {
+
                 int x = in.readInt();
                 int y = in.readInt();
+                boolean leftClick = in.readBoolean();
                 robot.mouseMove(x, y);
+                if(leftClick){
+                    robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                    robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

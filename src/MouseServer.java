@@ -1,13 +1,75 @@
 import java.awt.*;
-import java.io.DataInputStream;
+import java.awt.event.*;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.swing.JFrame;
 
-public class MouseServer {
-    private static void printIP(){
+public class MouseServer extends JFrame {
+    private DataOutputStream out;
+
+    public MouseServer() throws Exception {
+        setTitle("Mouse Server");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        ServerSocket serverSocket = new ServerSocket(5000);
+        System.out.println("Servidor aguardando conexão...");
+        Socket clientSocket = serverSocket.accept();
+        System.out.println("Cliente conectado");
+
+        out = new DataOutputStream(clientSocket.getOutputStream());
+        trackMouse();
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    out.close();
+                    clientSocket.close();
+                    serverSocket.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void trackMouse() {
+        // Add mouse listeners to this JFrame
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                sendMouseEvent(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                sendMouseEvent(e);
+            }
+        });
+
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                sendMouseEvent(e);
+            }
+        });
+    }
+
+    private void sendMouseEvent(MouseEvent e) {
+        try {
+            Point point = e.getPoint();
+            out.writeInt(point.x);
+            out.writeInt(point.y);
+            out.writeBoolean((e.getButton() == MouseEvent.BUTTON1));
+            out.flush();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void printIP() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();
             String localIpAddress = localHost.getHostAddress();
@@ -16,32 +78,13 @@ public class MouseServer {
             throw new RuntimeException(e);
         }
     }
-    private static void trackMouse(Socket clientSocket) throws IOException, InterruptedException, AWTException {
-        DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
-        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-        Robot robot = new Robot();
 
-        // Thread para enviar a posição do mouse
-        while (true) {
-            Point point = MouseInfo.getPointerInfo().getLocation();
-            out.writeInt(point.x);
-            out.writeInt(point.y);
-            out.flush();
-            Thread.sleep(10);
-        }
-    }
-    private static void connect(){
-        try (ServerSocket serverSocket = new ServerSocket(5000)) {
-            System.out.println("Servidor aguardando conexão...");
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("Cliente conectado");
-            trackMouse(clientSocket);
+    public static void main(String[] args) {
+        printIP();
+        try {
+            new MouseServer();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    public static void main(String[] args) {
-        printIP();
-        connect();
     }
 }
