@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 
 public class MouseServer extends JFrame {
     private DataOutputStream out;
-
+    private boolean leftClick;
     public MouseServer() throws Exception {
         setTitle("Mouse Server");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -19,6 +19,7 @@ public class MouseServer extends JFrame {
         System.out.println("Cliente conectado");
 
         out = new DataOutputStream(clientSocket.getOutputStream());
+
         trackMouse();
 
         addWindowListener(new WindowAdapter() {
@@ -33,36 +34,42 @@ public class MouseServer extends JFrame {
                 }
             }
         });
+        while (true) {
+            Point point = MouseInfo.getPointerInfo().getLocation();
+            sendMouseEvent(point);
+            Thread.sleep(10);
+        }
     }
 
     private void trackMouse() {
-        // Add mouse listeners to this JFrame
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                sendMouseEvent(e);
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    leftClick = true;
+                }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                sendMouseEvent(e);
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    leftClick = false;
+                }
             }
         });
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                sendMouseEvent(e);
             }
         });
     }
 
-    private void sendMouseEvent(MouseEvent e) {
+    private void sendMouseEvent(Point point) {
         try {
-            Point point = e.getPoint();
             out.writeInt(point.x);
             out.writeInt(point.y);
-            out.writeBoolean((e.getButton() == MouseEvent.BUTTON1));
+            out.writeBoolean(leftClick);
             out.flush();
         } catch (Exception ex) {
             ex.printStackTrace();
