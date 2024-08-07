@@ -21,12 +21,13 @@ public class MouseClient {
             while (true) {
                 int x = in.readInt();
                 int y = in.readInt();
-                boolean mousePressed = in.readBoolean();
+                boolean leftClick = in.readBoolean();
                 robot.mouseMove(x, y);
-                if (mousePressed) {
+                if(leftClick) {
                     robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                } else {
-                    robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                }
+                else {
+                    robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
                 }
             }
         } catch (Exception e) {
