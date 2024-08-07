@@ -17,19 +17,40 @@ public class MouseServer {
         }
     }
     private static void trackMouse(Socket clientSocket) throws IOException, InterruptedException, AWTException {
-        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
+        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         Robot robot = new Robot();
-        while (true) {
-            Point point = MouseInfo.getPointerInfo().getLocation();
-            out.writeInt(point.x);
-            out.writeInt(point.y);
-            out.flush();
-            Thread.sleep(10);
-            int x = in.readInt();
-            int y = in.readInt();
-            robot.mouseMove(x, y);
-        }
+
+        // Thread para enviar a posição do mouse
+        Thread sendThread = new Thread(() -> {
+            try {
+                while (true) {
+                    Point point = MouseInfo.getPointerInfo().getLocation();
+                    out.writeInt(point.x);
+                    out.writeInt(point.y);
+                    out.flush();
+                    Thread.sleep(10);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        // Thread para receber e aplicar a posição do mouse
+        Thread receiveThread = new Thread(() -> {
+            try {
+                while (true) {
+                    int x = in.readInt();
+                    int y = in.readInt();
+                    robot.mouseMove(x, y);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        sendThread.start();
+        receiveThread.start();
     }
     private static void connect(){
         try (ServerSocket serverSocket = new ServerSocket(5000)) {
