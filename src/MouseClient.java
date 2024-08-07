@@ -22,11 +22,11 @@ public class MouseClient {
                 int x = in.readInt();
                 int y = in.readInt();
                 robot.mouseMove(x, y);
+                Thread.sleep(10);
                 Point point = MouseInfo.getPointerInfo().getLocation();
                 out.writeInt(point.x);
                 out.writeInt(point.y);
                 out.flush();
-                Thread.sleep(10);
             }
         } catch (Exception e) {
             e.printStackTrace();

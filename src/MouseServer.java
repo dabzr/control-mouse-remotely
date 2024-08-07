@@ -25,10 +25,10 @@ public class MouseServer {
             out.writeInt(point.x);
             out.writeInt(point.y);
             out.flush();
+            Thread.sleep(10);
             int x = in.readInt();
             int y = in.readInt();
             robot.mouseMove(x, y);
-            Thread.sleep(10);
         }
     }
     private static void connect(){
