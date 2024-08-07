@@ -21,11 +21,13 @@ public class MouseClient {
             // Thread para enviar a posição do mouse
             Thread sendThread = new Thread(() -> {
                 try {
-                    Point point = MouseInfo.getPointerInfo().getLocation();
-                    out.writeInt(point.x);
-                    out.writeInt(point.y);
-                    out.flush();
-                    Thread.sleep(10);
+                    while (true) {
+                        Point point = MouseInfo.getPointerInfo().getLocation();
+                        out.writeInt(point.x);
+                        out.writeInt(point.y);
+                        out.flush();
+                        Thread.sleep(10);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -34,17 +36,18 @@ public class MouseClient {
             // Thread para receber e aplicar a posição do mouse
             Thread receiveThread = new Thread(() -> {
                 try {
-                    int x = in.readInt();
-                    int y = in.readInt();
-                    robot.mouseMove(x, y);
+                    while (true) {
+                        int x = in.readInt();
+                        int y = in.readInt();
+                        robot.mouseMove(x, y);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
-            while(true) {
-                sendThread.start();
-                receiveThread.start();
-            }
+
+            sendThread.start();
+            receiveThread.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
