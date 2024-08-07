@@ -16,13 +16,8 @@ public class MouseClient {
         HandleIp();
         try (Socket socket = new Socket(host, 5000)) { // Substitua pelo IP do servidor
             DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             Robot robot = new Robot();
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-            out.writeInt(screenSize.width);
-            out.writeInt(screenSize.height);
-            out.flush();
             while (true) {
 
                 int x = in.readInt();

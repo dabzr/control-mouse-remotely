@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -22,13 +21,7 @@ public class MouseServer extends JFrame {
         System.out.println("Cliente conectado");
 
         out = new DataOutputStream(clientSocket.getOutputStream());
-        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-        out = new DataOutputStream(clientSocket.getOutputStream());
 
-        int screenWidth = in.readInt();
-        int screenHeight = in.readInt();
-        setSize(screenWidth, screenHeight);
-        setLocationRelativeTo(null);
         trackMouse();
 
         addWindowListener(new WindowAdapter() {
