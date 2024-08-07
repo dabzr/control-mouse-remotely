@@ -22,35 +22,13 @@ public class MouseServer {
         Robot robot = new Robot();
 
         // Thread para enviar a posição do mouse
-        Thread sendThread = new Thread(() -> {
-            try {
-                while (true) {
-                    Point point = MouseInfo.getPointerInfo().getLocation();
-                    out.writeInt(point.x);
-                    out.writeInt(point.y);
-                    out.flush();
-                    Thread.sleep(10);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-        // Thread para receber e aplicar a posição do mouse
-        Thread receiveThread = new Thread(() -> {
-            try {
-                while (true) {
-                    int x = in.readInt();
-                    int y = in.readInt();
-                    robot.mouseMove(x, y);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-        sendThread.start();
-        receiveThread.start();
+        while (true) {
+            Point point = MouseInfo.getPointerInfo().getLocation();
+            out.writeInt(point.x);
+            out.writeInt(point.y);
+            out.flush();
+            Thread.sleep(10);
+        }
     }
     private static void connect(){
         try (ServerSocket serverSocket = new ServerSocket(5000)) {
